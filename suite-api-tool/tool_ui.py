@@ -1,15 +1,20 @@
 import sys
+from os.path import isfile
 from client import Client
+from resource_table import ResourceTable
 from PyQt5.QtWidgets import *
+from PyQt5 import QtCore
 
 class ToolUI(QMainWindow):
 
-    def __init__(self):
+    def __init__(self, clipboard):
         super().__init__()
+        self.clipboard = clipboard
         self.__address_bar = QLineEdit()
         self.__adapter_type_combobox = QComboBox
         self.__adapter_instance_combobox = QComboBox
         self.__connect_button = QPushButton
+        self.__resource_table = ResourceTable()
         self.__client = None
         self.initUI()
 
@@ -24,7 +29,9 @@ class ToolUI(QMainWindow):
         vbox = QVBoxLayout()
         vbox.addLayout(self.__createAddressBar())
         vbox.addLayout(self.__createAdapterKindSelector())
+        vbox.addLayout(self.__createResourceKindSelector())
         vbox.addLayout(self.__createAdapterInstanceSelector())
+        vbox.addWidget(self.__resource_table)
         return vbox
 
     def __createAddressBar(self):
@@ -41,7 +48,9 @@ class ToolUI(QMainWindow):
         return address_bar_layout
 
     def __getCompleterListFromFile(self):
-        with open("completion_list") as f:
+        if not isfile("completion_list"):
+            return list()
+        with open("completion_list", "r+") as f:
             lines = f.read().splitlines()
         return lines
 
@@ -54,6 +63,15 @@ class ToolUI(QMainWindow):
         adapter_kind_selector_layout.addWidget(label)
         adapter_kind_selector_layout.addWidget(self.__adapter_type_combobox)
         return adapter_kind_selector_layout
+
+    def __createResourceKindSelector(self):
+        resource_kind_selector_layout = QHBoxLayout()
+        label = QLabel("Resource Kind: ")
+        self.__resource_kind_combobox = QComboBox()
+        self.__resource_kind_combobox.setFixedSize(500,25)
+        resource_kind_selector_layout.addWidget(label)
+        resource_kind_selector_layout.addWidget(self.__resource_kind_combobox)
+        return resource_kind_selector_layout
 
     def __createAdapterInstanceSelector(self):
         adapter_instance_selector_layout = QHBoxLayout()
@@ -76,7 +94,6 @@ class ToolUI(QMainWindow):
             return
         try:
             items = self.__client.getAdapterKinds()
-            self.__adapter_type_combobox.clear()
             self.__addItemsToAdapterKinds(items)
             self.__addItemToCompletionList(self.__address_bar.text())
             self.__address_bar.setCompleter(QCompleter(self.__getCompleterListFromFile()))
@@ -84,6 +101,7 @@ class ToolUI(QMainWindow):
             QMessageBox.warning(self.__main_widget, "Warning", str(error), QMessageBox.Ok)
 
     def __addItemsToAdapterKinds(self, items):
+        self.__adapter_type_combobox.clear()
         for item in items:
             self.__adapter_type_combobox.addItem(item[0], item[1])
 
@@ -94,20 +112,67 @@ class ToolUI(QMainWindow):
     def __adapterKindComboBoxSelection(self):
         adapter_kind = self.__adapter_type_combobox.currentData()
         adapter_instances = self.__client.getAdapterInstances(adapter_kind)
+        resource_kinds = self.__client.getResourceKindsByAdapterKind(adapter_kind)
         self.__addItemsToAdapterInstances(adapter_instances)
+        self.__addItemsToResourceKinds(resource_kinds)
 
-    def __addItemsToAdapterInstances(self,items):
+    def __addItemsToAdapterInstances(self, items):
+        self.__adapter_instance_combobox.clear()
         for item in items:
             self.__adapter_instance_combobox.addItem(item[0], item[1])
 
     def __adapterInstanceComboBoxSelection(self):
         adapter_instance_id = self.__adapter_instance_combobox.currentData()
-        self.__client.getResources(adapter_instance_id)
+        resource_kind_id = self.__resource_kind_combobox.currentData()
+        resources = self.__client.getResources(adapter_instance_id, resource_kind_id)
+        self.__createResourceTable(resources)
 
+    def __addItemsToResourceKinds(self, resource_kinds):
+        self.__resource_kind_combobox.clear()
+        for resource_kind in resource_kinds:
+            self.__resource_kind_combobox.addItem(resource_kind[0], resource_kind[1])
 
+    def __createResourceTable(self, resources):
+        self.__resource_table.setColumnCount(0)
+        self.__resource_table.setRowCount(0)
+        self.__resource_table.reInit()
+        self.__resource_table.addResources(resources)
+
+    def keyPressEvent(self, key_event):
+
+        # print("event modifier: " + str(key_event.modifiers().__eq__(QtCore.Qt.ControlModifier)))
+        # print("key pressed: " + str(key_event.key()))
+        # print("looking for key: " + str(QtCore.Qt.Key_Control) + " or key: " + str(QtCore.Qt.Key_Meta))
+        if key_event.key() == QtCore.Qt.Key_C and key_event.modifiers().__eq__(QtCore.Qt.ControlModifier):
+            self.copySelectedCellsToClipboard()
+
+    def copySelectedCellsToClipboard(self):
+        if len(self.__resource_table.selectedItems()) > 0:
+            print("selected things on the table!!!")
+            strings = list()
+            row = list()
+            last_row = None
+            got_columns = False
+            columns = list()
+            for item in self.__resource_table.selectedItems():
+                current_row = item.row()
+                if(last_row is not None and last_row < current_row):
+                    if(not got_columns):
+                        strings.append('\t'.join(columns))
+                        strings.append('\n')
+                        got_columns = True
+                    strings.append('\t'.join(row))
+                    strings.append('\n')
+                    row.clear()
+                if(not got_columns):
+                    str(self.__resource_table.horizontalHeaderItem(item.column()))
+                    columns.append(str(self.__resource_table.horizontalHeaderItem(item.column()).text()))
+                row.append(str(item.text()))
+                last_row = item.row()
+            self.clipboard.setText(''.join(strings))
 
 if __name__ == '__main__':
 
     app = QApplication(sys.argv)
-    ex = ToolUI()
+    ex = ToolUI(app.clipboard())
     sys.exit(app.exec_())

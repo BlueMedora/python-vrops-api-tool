@@ -1,5 +1,7 @@
 import requests
 import re
+import json
+import math
 
 class Client:
 
@@ -9,6 +11,8 @@ class Client:
         if not self.is_valid_hostname(hostname):
             raise ValueError("Please enter a valid hostname!")
         self.__base_url = "https://"+hostname+"/suite-api/api"
+        self.adapter_kind = None
+        self.resource_kinds = None
 
     def getAdapterKinds(self):
         url = self.__base_url + "/adapterkinds"
@@ -19,21 +23,74 @@ class Client:
         return keys
 
     def getAdapterInstances(self, adapter_kind):
-        url = self.__base_url + "/adapters"
         payload = {"adapterKindKey": adapter_kind}
-        response = requests.get(url,
-                                auth=(self.__username, self.__password),
-                                headers={"Accept": "application/json"},
-                                params=payload,
-                                verify=False,
-                                timeout=5)
+        json = self.__get("/adapters", payload)
         keys = list()
-        for thing in response.json()['adapterInstancesInfoDto']:
+        for thing in json['adapterInstancesInfoDto']:
             keys.append((thing['resourceKey']['name'], thing['id']))
         return keys
 
-    def getResources(self, adapter_instance_id):
-        None
+    def getResourceKindsByAdapterKind(self, adapter_kind):
+        endpoint = "/adapterkinds/"+adapter_kind+"/resourcekinds"
+        json = self.__get(endpoint)
+        resource_kinds = list()
+        for resource_kind in json['resource-kind']:
+            resource_kinds.append((resource_kind['name'], resource_kind['key']))
+        return resource_kinds
+
+    def getResources(self, adapter_instance_id, resource_kinds):
+        resources = self.__getResourceList(adapter_instance_id, resource_kinds)
+        return self.__processResources(resources)
+
+    def __getResourceList(self, adapter_instance_id, resource_kinds):
+        page = 0
+        resource_list = list()
+        while True:
+            url = self.__base_url + "/resources"
+            payload = {"adapterInstanceId": adapter_instance_id, "resourceKind": resource_kinds, "page": page}
+            json_response = self.__get("/resources", payload)
+
+            #add resources to list
+            resource_list.extend(json_response["resourceList"])
+            if self.__isLastPage(json_response['pageInfo']):
+                break
+            page += 1
+        return resource_list
+
+    def __isLastPage(self, page_info):
+        total_items = page_info['totalCount']
+        page_size = page_info['pageSize']
+        page_index = page_info['page']
+        last_page_index = total_items // page_size
+        return page_index >= last_page_index
+
+    def __processResources(self, resources):
+        all_resources = list()
+        for resource in resources:
+            resource_dict = dict()
+            resource_dict['name'] = resource['resourceKey']['name']
+            resource_dict['uuid'] = resource['identifier']
+            resource_dict['identifiers'] = list()
+            resource_identifiers = resource['resourceKey']['resourceIdentifiers']
+            for id in resource_identifiers:
+                identifier = dict()
+                identifier['name'] = id['identifierType']['name']
+                identifier['value'] = id['value']
+                resource_dict['identifiers'].append(identifier)
+            all_resources.append(resource_dict)
+
+        return all_resources
+
+    def __get(self, endpoint, parameters=None):
+        url = self.__base_url + endpoint
+        response = requests.get(url,
+                                auth=(self.__username, self.__password),
+                                headers={"Accept": "application/json"},
+                                params=parameters,
+                                verify=False,
+                                timeout=5)
+        return response.json()
+
 
     def is_valid_hostname(self, hostname):
         if len(hostname) > 255:
