@@ -23,7 +23,6 @@ class ResourceTable(QTableWidget):
     def addResource(self, resource):
         row_index = self.rowCount()
         self.insertRow(self.rowCount())
-        row_count = self.rowCount()
 
         resource_name = QTableWidgetItem()
 

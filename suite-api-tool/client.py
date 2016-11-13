@@ -1,8 +1,5 @@
 import requests
 import re
-import json
-import math
-
 class Client:
 
     def __init__(self, hostname):
@@ -20,6 +17,7 @@ class Client:
         keys = list()
         for thing in response.json()['adapter-kind']:
             keys.append((thing['name'], thing['key']))
+        keys = sorted(keys, key=lambda k: k[0].lower())
         return keys
 
     def getAdapterInstances(self, adapter_kind):
@@ -28,6 +26,7 @@ class Client:
         keys = list()
         for thing in json['adapterInstancesInfoDto']:
             keys.append((thing['resourceKey']['name'], thing['id']))
+        keys = sorted(keys, key=lambda k: k[0].lower())
         return keys
 
     def getResourceKindsByAdapterKind(self, adapter_kind):
@@ -36,6 +35,7 @@ class Client:
         resource_kinds = list()
         for resource_kind in json['resource-kind']:
             resource_kinds.append((resource_kind['name'], resource_kind['key']))
+        resource_kinds = sorted(resource_kinds, key=lambda k: k[0].lower())
         return resource_kinds
 
     def getResources(self, adapter_instance_id, resource_kinds):
@@ -78,11 +78,40 @@ class Client:
                 identifier['value'] = id['value']
                 resource_dict['identifiers'].append(identifier)
             all_resources.append(resource_dict)
-
+        all_resources = sorted(all_resources, key=lambda k: k['name'].lower())
         return all_resources
+
+    def getMetricsByResourceUUID(self, uuid):
+        endpoint = '/resources/stats/latest'
+        payload = {"resourceId": uuid}
+        response = self.__get(endpoint, payload)
+        metrics = list()
+
+        for entry in response.get('values', list()):
+            for stat in entry['stat-list']['stat']:
+                metric = dict()
+                metric['key'] = stat['statKey']['key']
+                metric['timestamp'] = stat['timestamps'][0]
+                metric['value'] = stat['data'][0]
+                metrics.append(metric)
+        metrics = sorted(metrics, key=lambda k: k['key'].lower())
+        return metrics
+
+    def getPropertiesByResourceUUID(self, uuid):
+        endpoint = '/resources/'+str(uuid)+'/properties'
+        response = self.__get(endpoint)
+        properties = list()
+        for stat in response['property']:
+            prop = dict()
+            prop['key'] = stat['name']
+            prop['value'] = stat['value']
+            properties.append(prop)
+        properties = sorted(properties, key=lambda k: k['key'].lower())
+        return properties
 
     def __get(self, endpoint, parameters=None):
         url = self.__base_url + endpoint
+        print(url)
         response = requests.get(url,
                                 auth=(self.__username, self.__password),
                                 headers={"Accept": "application/json"},

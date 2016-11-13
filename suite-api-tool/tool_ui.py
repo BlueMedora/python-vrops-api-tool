@@ -2,6 +2,7 @@ import sys
 from os.path import isfile
 from client import Client
 from resource_table import ResourceTable
+from resource_details import ResourceDetails
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore
 
@@ -9,12 +10,14 @@ class ToolUI(QMainWindow):
 
     def __init__(self, clipboard):
         super().__init__()
+        self.resize(800,600)
         self.clipboard = clipboard
         self.__address_bar = QLineEdit()
         self.__adapter_type_combobox = QComboBox
         self.__adapter_instance_combobox = QComboBox
         self.__connect_button = QPushButton
         self.__resource_table = ResourceTable()
+        self.__resource_table.doubleClicked.connect(self.getResourceDetails)
         self.__client = None
         self.initUI()
 
@@ -139,12 +142,34 @@ class ToolUI(QMainWindow):
         self.__resource_table.addResources(resources)
 
     def keyPressEvent(self, key_event):
-
-        # print("event modifier: " + str(key_event.modifiers().__eq__(QtCore.Qt.ControlModifier)))
-        # print("key pressed: " + str(key_event.key()))
-        # print("looking for key: " + str(QtCore.Qt.Key_Control) + " or key: " + str(QtCore.Qt.Key_Meta))
         if key_event.key() == QtCore.Qt.Key_C and key_event.modifiers().__eq__(QtCore.Qt.ControlModifier):
             self.copySelectedCellsToClipboard()
+
+    def getResourceDetails(self):
+        selected_items = self.__resource_table.selectedItems()
+        all_same = all(e.row() == selected_items[0].row() for e in selected_items)
+        if not all_same:
+            QMessageBox.warning(self.__main_widget, "Warning", "Please only select one row.", QMessageBox.Ok)
+            return
+        # get uuid of row
+        resource_id = None
+        resource_name = None
+        for item in self.__resource_table.selectedItems():
+            if item.column() == 0:
+                resource_name = item.text()
+            if item.column() == 1:
+                resource_id = item.text()
+        if resource_id is None or resource_name is None:
+            QMessageBox.warning(self.__main_widget, "Warning", "Could not find one or both of Name or UUID of resource selected.", QMessageBox.Ok)
+            return
+        metrics = self.__client.getMetricsByResourceUUID(resource_id)
+        properties = self.__client.getPropertiesByResourceUUID(resource_id)
+        resource_details = ResourceDetails(self, metrics, properties)
+        resource_details.setWindowTitle(resource_name)
+        resource_details.setWindowFlags(QtCore.Qt.Window)
+        resource_details.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+        resource_details.resize(600, 800)
+        resource_details.show()
 
     def copySelectedCellsToClipboard(self):
         if len(self.__resource_table.selectedItems()) > 0:
