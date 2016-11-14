@@ -3,10 +3,11 @@ from metrics_table import MetricsTable
 
 class ResourceDetails(QWidget):
 
-    def __init__(self, parent, metrics, properties):
+    def __init__(self, parent, clipboard, metrics, properties):
         super().__init__(parent)
-        self.metrics_table = MetricsTable()
-        self.properties_table = MetricsTable()
+        self.clipboard = clipboard
+        self.metrics_table = MetricsTable(self.clipboard)
+        self.properties_table = MetricsTable(self.clipboard)
         self.initUI(metrics, properties)
 
     def initUI(self, metrics, properties):

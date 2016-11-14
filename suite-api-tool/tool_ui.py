@@ -13,10 +13,10 @@ class ToolUI(QMainWindow):
         self.resize(800,600)
         self.clipboard = clipboard
         self.__address_bar = QLineEdit()
-        self.__adapter_type_combobox = QComboBox
-        self.__adapter_instance_combobox = QComboBox
-        self.__connect_button = QPushButton
-        self.__resource_table = ResourceTable()
+        self.__adapter_type_combobox = QComboBox()
+        self.__adapter_instance_combobox = QComboBox()
+        self.__connect_button = QPushButton()
+        self.__resource_table = ResourceTable(clipboard)
         self.__resource_table.doubleClicked.connect(self.getResourceDetails)
         self.__client = None
         self.initUI()
@@ -141,10 +141,6 @@ class ToolUI(QMainWindow):
         self.__resource_table.reInit()
         self.__resource_table.addResources(resources)
 
-    def keyPressEvent(self, key_event):
-        if key_event.key() == QtCore.Qt.Key_C and key_event.modifiers().__eq__(QtCore.Qt.ControlModifier):
-            self.copySelectedCellsToClipboard()
-
     def getResourceDetails(self):
         selected_items = self.__resource_table.selectedItems()
         all_same = all(e.row() == selected_items[0].row() for e in selected_items)
@@ -164,37 +160,12 @@ class ToolUI(QMainWindow):
             return
         metrics = self.__client.getMetricsByResourceUUID(resource_id)
         properties = self.__client.getPropertiesByResourceUUID(resource_id)
-        resource_details = ResourceDetails(self, metrics, properties)
+        resource_details = ResourceDetails(self, self.clipboard, metrics, properties)
         resource_details.setWindowTitle(resource_name)
         resource_details.setWindowFlags(QtCore.Qt.Window)
         resource_details.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         resource_details.resize(600, 800)
         resource_details.show()
-
-    def copySelectedCellsToClipboard(self):
-        if len(self.__resource_table.selectedItems()) > 0:
-            print("selected things on the table!!!")
-            strings = list()
-            row = list()
-            last_row = None
-            got_columns = False
-            columns = list()
-            for item in self.__resource_table.selectedItems():
-                current_row = item.row()
-                if(last_row is not None and last_row < current_row):
-                    if(not got_columns):
-                        strings.append('\t'.join(columns))
-                        strings.append('\n')
-                        got_columns = True
-                    strings.append('\t'.join(row))
-                    strings.append('\n')
-                    row.clear()
-                if(not got_columns):
-                    str(self.__resource_table.horizontalHeaderItem(item.column()))
-                    columns.append(str(self.__resource_table.horizontalHeaderItem(item.column()).text()))
-                row.append(str(item.text()))
-                last_row = item.row()
-            self.clipboard.setText(''.join(strings))
 
 if __name__ == '__main__':
 

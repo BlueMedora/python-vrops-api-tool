@@ -1,8 +1,9 @@
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
+from easy_table import EasyTable
 
-class ResourceTable(QTableWidget):
-    def __init__(self):
-        super().__init__()
+class ResourceTable(EasyTable):
+    def __init__(self, clipboard):
+        super(ResourceTable, self).__init__(clipboard)
 
     def reInit(self):
         self.setSelectionBehavior(QTableWidget.SelectRows)

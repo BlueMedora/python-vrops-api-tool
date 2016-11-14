@@ -1,7 +1,8 @@
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
-class MetricsTable(QTableWidget):
-    def __init__(self):
-        super().__init__()
+from easy_table import EasyTable
+class MetricsTable(EasyTable):
+    def __init__(self, clipboard):
+        super(MetricsTable, self).__init__(clipboard)
         self.reInit()
 
     def reInit(self):
