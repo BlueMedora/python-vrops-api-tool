@@ -5,6 +5,7 @@ from resource_table import ResourceTable
 from resource_details import ResourceDetails
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore
+import os
 
 class ToolUI(QMainWindow):
 
@@ -58,9 +59,9 @@ class ToolUI(QMainWindow):
         return address_bar_layout
 
     def __getCompleterListFromFile(self):
-        if not isfile("completion_list"):
+        if not isfile(os.path.join(sys.path[0], "completion_list")):
             return list()
-        with open("completion_list", "r+") as f:
+        with open(os.path.join(sys.path[0], "completion_list"), "r+") as f:
             lines = f.read().splitlines()
         return lines
 
@@ -120,13 +121,13 @@ class ToolUI(QMainWindow):
 
     def __addItemToCompletionList(self, item):
         current_list = list()
-        if isfile("completion_list"):
-            with open("completion_list", "r+") as f:
+        if isfile(os.path.join(sys.path[0], "completion_list")):
+            with open(os.path.join(sys.path[0], "completion_list"), "r+") as f:
                 current_list = f.read().splitlines()
         if(item in current_list):
             current_list.remove(item)
         current_list.insert(0, item)
-        with open("completion_list", 'w+') as file:
+        with open(os.path.join(sys.path[0], "completion_list"), 'w+') as file:
             file.write("\n".join(current_list))
 
     def __adapterKindComboBoxSelection(self):
