@@ -111,7 +111,6 @@ class Client:
 
     def __get(self, endpoint, parameters=None):
         url = self.__base_url + endpoint
-        print(url)
         response = requests.get(url,
                                 auth=(self.__username, self.__password),
                                 headers={"Accept": "application/json"},

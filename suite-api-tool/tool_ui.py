@@ -72,6 +72,7 @@ class ToolUI(QMainWindow):
         label = QLabel("Resource Kind: ")
         self.__resource_kind_combobox = QComboBox()
         self.__resource_kind_combobox.setFixedSize(500,25)
+        self.__resource_kind_combobox.activated.connect(self.__adapterInstanceComboBoxSelection)
         resource_kind_selector_layout.addWidget(label)
         resource_kind_selector_layout.addWidget(self.__resource_kind_combobox)
         return resource_kind_selector_layout
