@@ -17,6 +17,7 @@ class ToolUI(QMainWindow):
         self.__adapter_type_combobox = QComboBox()
         self.__adapter_instance_combobox = QComboBox()
         self.__connect_button = QPushButton()
+        self.__connect_button.setAutoDefault(True)
         self.__connection_label = QLabel()
         self.__resource_table = ResourceTable(clipboard)
         self.__resource_table.doubleClicked.connect(self.getResourceDetails)
@@ -180,7 +181,7 @@ class ToolUI(QMainWindow):
         resource_details.setWindowTitle(resource_name)
         resource_details.setWindowFlags(QtCore.Qt.Window)
         resource_details.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-        resource_details.resize(600, 800)
+        resource_details.resize(800, 800)
         resource_details.show()
 
 if __name__ == '__main__':
