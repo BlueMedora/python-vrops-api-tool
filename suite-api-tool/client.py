@@ -49,7 +49,6 @@ class Client:
             url = self.__base_url + "/resources"
             payload = {"adapterInstanceId": adapter_instance_id, "resourceKind": resource_kinds, "page": page}
             json_response = self.__get("/resources", payload)
-
             #add resources to list
             resource_list.extend(json_response["resourceList"])
             if self.__isLastPage(json_response['pageInfo']):

@@ -9,6 +9,7 @@ from PyQt5 import QtCore
 class ToolUI(QMainWindow):
 
     def __init__(self, clipboard):
+
         super().__init__()
         self.resize(800,600)
         self.clipboard = clipboard
@@ -16,6 +17,7 @@ class ToolUI(QMainWindow):
         self.__adapter_type_combobox = QComboBox()
         self.__adapter_instance_combobox = QComboBox()
         self.__connect_button = QPushButton()
+        self.__connection_label = QLabel()
         self.__resource_table = ResourceTable(clipboard)
         self.__resource_table.doubleClicked.connect(self.getResourceDetails)
         self.__client = None
@@ -26,11 +28,17 @@ class ToolUI(QMainWindow):
         self.__main_widget.setLayout(self.__createMainLayout())
         self.setCentralWidget(self.__main_widget)
         self.__assignClickActions()
+        self.setTabOrder(self.__address_bar, self.__connect_button)
+        self.setTabOrder(self.__connect_button, self.__adapter_type_combobox)
+        self.setTabOrder(self.__adapter_type_combobox, self.__resource_kind_combobox)
+        self.setTabOrder(self.__resource_kind_combobox, self.__adapter_instance_combobox)
+        self.setTabOrder(self.__adapter_instance_combobox, self.__resource_table)
         self.show()
 
     def __createMainLayout(self):
         vbox = QVBoxLayout()
         vbox.addLayout(self.__createAddressBar())
+        vbox.addWidget(self.__connection_label)
         vbox.addLayout(self.__createAdapterKindSelector())
         vbox.addLayout(self.__createResourceKindSelector())
         vbox.addLayout(self.__createAdapterInstanceSelector())
@@ -41,9 +49,7 @@ class ToolUI(QMainWindow):
         address_bar_layout = QHBoxLayout()
         address_bar_label = QLabel()
         address_bar_label.setText("Hostname:")
-        self.__address_bar = QLineEdit()
         self.__address_bar.setCompleter(QCompleter(self.__getCompleterListFromFile()))
-        self.__connect_button = QPushButton()
         self.__connect_button.setText("Connect!")
         address_bar_layout.addWidget(address_bar_label)
         address_bar_layout.addWidget(self.__address_bar)
@@ -60,7 +66,6 @@ class ToolUI(QMainWindow):
     def __createAdapterKindSelector(self):
         adapter_kind_selector_layout = QHBoxLayout()
         label = QLabel("Adapter Type: ")
-        self.__adapter_type_combobox = QComboBox()
         self.__adapter_type_combobox.setFixedSize(500,25)
         self.__adapter_type_combobox.activated.connect(self.__adapterKindComboBoxSelection)
         adapter_kind_selector_layout.addWidget(label)
@@ -80,7 +85,6 @@ class ToolUI(QMainWindow):
     def __createAdapterInstanceSelector(self):
         adapter_instance_selector_layout = QHBoxLayout()
         label = QLabel("Adapter Instance: ")
-        self.__adapter_instance_combobox = QComboBox()
         self.__adapter_instance_combobox.setFixedSize(500,25)
         self.__adapter_instance_combobox.activated.connect(self.__adapterInstanceComboBoxSelection)
         adapter_instance_selector_layout.addWidget(label)
@@ -93,14 +97,18 @@ class ToolUI(QMainWindow):
     def __connectClicked(self):
         try:
             self.__client = Client(self.__address_bar.text())
+            self.__connection_label.setText("Currently Connected to: " + self.__address_bar.text())
         except ValueError as error:
             QMessageBox.warning(self.__main_widget, "Warning", str(error), QMessageBox.Ok)
             return
         try:
             items = self.__client.getAdapterKinds()
+            self.__address_bar.completer()
             self.__addItemsToAdapterKinds(items)
             self.__addItemToCompletionList(self.__address_bar.text())
             self.__address_bar.setCompleter(QCompleter(self.__getCompleterListFromFile()))
+            self.__adapter_instance_combobox.clear()
+            self.__resource_kind_combobox.clear()
         except Exception as error:
             QMessageBox.warning(self.__main_widget, "Warning", str(error), QMessageBox.Ok)
 
@@ -110,8 +118,15 @@ class ToolUI(QMainWindow):
             self.__adapter_type_combobox.addItem(item[0], item[1])
 
     def __addItemToCompletionList(self, item):
-        with open("completion_list", 'a+') as file:
-            file.write(item+"\n")
+        current_list = list()
+        if isfile("completion_list"):
+            with open("completion_list", "r+") as f:
+                current_list = f.read().splitlines()
+        if(item in current_list):
+            current_list.remove(item)
+        current_list.insert(0, item)
+        with open("completion_list", 'w+') as file:
+            file.write("\n".join(current_list))
 
     def __adapterKindComboBoxSelection(self):
         adapter_kind = self.__adapter_type_combobox.currentData()
@@ -169,7 +184,6 @@ class ToolUI(QMainWindow):
         resource_details.show()
 
 if __name__ == '__main__':
-
     app = QApplication(sys.argv)
     ex = ToolUI(app.clipboard())
     sys.exit(app.exec_())
