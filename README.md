@@ -1,3 +1,11 @@
+## Installing vropts-api-tool
+grab the latest binary from releases
+
+## Contributing
+please file an issue or feature request in github issues
+PRs are welcome
+
+## Building vrops-api-tool
 ### Python scripts to collect data from vrops
  - `brew update`
  - `brew install pyenv`
@@ -6,6 +14,12 @@
  - `pyenv install 3.5.2`
  - `pip install -r requirements.txt`
  - `./suite-api-tool/tool_ui.py`
+
+### Building Redistributable
+ After running the above commands run:
+ - `pip install git+https://github.com/pyinstaller/pyinstaller.git`
+ - `./make_dist.sh`
+ in addition, make sure that your .bashrc contains pyenv's init (`eval $(pyenv init -)`)
 
 ### Troubleshooting
 - pyenv init
