@@ -51,7 +51,7 @@ class ToolUI(QMainWindow):
         address_bar_layout = QHBoxLayout()
         address_bar_label = QLabel()
         address_bar_label.setText("Hostname:")
-        self.__address_bar.setCompleter(QCompleter(self.__getCompleterListFromFile()))
+        # self.__address_bar.setCompleter(QCompleter(self.__getCompleterListFromFile()))
         self.__connect_button.setText("Connect!")
         address_bar_layout.addWidget(address_bar_label)
         address_bar_layout.addWidget(self.__address_bar)
@@ -108,7 +108,7 @@ class ToolUI(QMainWindow):
             self.__address_bar.completer()
             self.__addItemsToAdapterKinds(items)
             self.__addItemToCompletionList(self.__address_bar.text())
-            self.__address_bar.setCompleter(QCompleter(self.__getCompleterListFromFile()))
+            # self.__address_bar.setCompleter(QCompleter(self.__getCompleterListFromFile()))
             self.__adapter_instance_combobox.clear()
             self.__resource_kind_combobox.clear()
         except Exception as error:
