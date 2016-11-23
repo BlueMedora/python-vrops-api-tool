@@ -19,14 +19,14 @@ fi
 
 # set up your app name, version number, and background image file name
 APP_NAME="suite-api-tool"
-VERSION="0.0.1"
+VERSION="v0.0.1"
 
 # you should not need to change these
 APP_EXE="${APP_NAME}.app/Contents/MacOS/${APP_NAME}"
 
-VOL_NAME="${APP_NAME} ${VERSION}"   # volume name will be "SuperCoolApp 1.0.0"
+VOL_NAME="${APP_NAME}_${VERSION}" 
 DMG_TMP="${VOL_NAME}-temp.dmg"
-DMG_FINAL="${VOL_NAME}.dmg"         # final DMG name will be "SuperCoolApp 1.0.0.dmg"
+DMG_FINAL="${VOL_NAME}.dmg"  
 STAGING_DIR="./dist"             # we copy all our stuff into this dir
 
 rm -rf "${DMG_TMP}" "${DMG_FINAL}"
@@ -36,7 +36,7 @@ rm -rf "${DMG_TMP}" "${DMG_FINAL}"
 #  assumes our contents are at least 1M!
 SIZE=`du -sh "${STAGING_DIR}" | sed 's/\([0-9\.]*\)M\(.*\)/\1/'` 
 SIZE=`echo "${SIZE} + 1.0" | bc | awk '{print int($1+0.5)}'`
-echo "$SIZE"
+
 if [ $? -ne 0 ]; then
    echo "Error: Cannot compute size of staging dir"
    exit
