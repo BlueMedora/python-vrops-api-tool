@@ -107,7 +107,7 @@ class ToolUI(QMainWindow):
             items = self.__client.getAdapterKinds()
             self.__address_bar.completer()
             self.__addItemsToAdapterKinds(items)
-            self.__addItemToCompletionList(self.__address_bar.text())
+            # self.__addItemToCompletionList(self.__address_bar.text())
             # self.__address_bar.setCompleter(QCompleter(self.__getCompleterListFromFile()))
             self.__adapter_instance_combobox.clear()
             self.__resource_kind_combobox.clear()
