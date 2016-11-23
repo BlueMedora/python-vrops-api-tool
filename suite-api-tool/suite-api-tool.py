@@ -51,7 +51,7 @@ class ToolUI(QMainWindow):
         address_bar_layout = QHBoxLayout()
         address_bar_label = QLabel()
         address_bar_label.setText("Hostname:")
-        # self.__address_bar.setCompleter(QCompleter(self.__getCompleterListFromFile()))
+        self.__address_bar.setCompleter(QCompleter(self.__getCompleterListFromFile()))
         self.__connect_button.setText("Connect!")
         address_bar_layout.addWidget(address_bar_label)
         address_bar_layout.addWidget(self.__address_bar)
@@ -59,9 +59,9 @@ class ToolUI(QMainWindow):
         return address_bar_layout
 
     def __getCompleterListFromFile(self):
-        if not isfile(os.path.join(sys.path[0], "completion_list")):
+        if not isfile(os.path.join(os.path.expanduser('~'), ".config/suite-api-tool/completion_list")):
             return list()
-        with open(os.path.join(sys.path[0], "completion_list"), "r+") as f:
+        with open(os.path.join(os.path.expanduser('~'), ".config/suite-api-tool/completion_list"), "r+") as f:
             lines = f.read().splitlines()
         return lines
 
@@ -107,8 +107,8 @@ class ToolUI(QMainWindow):
             items = self.__client.getAdapterKinds()
             self.__address_bar.completer()
             self.__addItemsToAdapterKinds(items)
-            # self.__addItemToCompletionList(self.__address_bar.text())
-            # self.__address_bar.setCompleter(QCompleter(self.__getCompleterListFromFile()))
+            self.__addItemToCompletionList(self.__address_bar.text())
+            self.__address_bar.setCompleter(QCompleter(self.__getCompleterListFromFile()))
             self.__adapter_instance_combobox.clear()
             self.__resource_kind_combobox.clear()
         except Exception as error:
@@ -121,13 +121,13 @@ class ToolUI(QMainWindow):
 
     def __addItemToCompletionList(self, item):
         current_list = list()
-        if isfile(os.path.join(sys.path[0], "completion_list")):
-            with open(os.path.join(sys.path[0], "completion_list"), "r+") as f:
+        if isfile(os.path.join(os.path.expanduser('~'), ".config/suite-api-tool/completion_list")):
+            with open(os.path.join(os.path.expanduser('~'), ".config/suite-api-tool/completion_list"), "r+") as f:
                 current_list = f.read().splitlines()
         if(item in current_list):
             current_list.remove(item)
         current_list.insert(0, item)
-        with open(os.path.join(sys.path[0], "completion_list"), 'w+') as file:
+        with open(os.path.join(os.path.expanduser('~'), ".config/suite-api-tool/completion_list"), 'w+') as file:
             file.write("\n".join(current_list))
 
     def __adapterKindComboBoxSelection(self):
@@ -186,6 +186,12 @@ class ToolUI(QMainWindow):
         resource_details.show()
 
 if __name__ == '__main__':
+    if not os.path.isdir(os.path.join(os.path.expanduser('~'), '.config')):
+        os.mkdir(os.path.join(os.path.expanduser('~'), '.config'), 0o644)
+    if not os.path.isdir(os.path.join(os.path.expanduser('~'), '.config/suite-api-tool')):
+        os.mkdir(os.path.join(os.path.expanduser('~'), '.config/suite-api-tool'), 0o755)
+    if not os.path.isfile(os.path.join(os.path.expanduser('~'), '.config/suite-api-tool/completion_list')):
+        open(os.path.join(os.path.expanduser('~'), '.config/suite-api-tool/completion_list'), 'a').close()
     app = QApplication(sys.argv)
     ex = ToolUI(app.clipboard())
     sys.exit(app.exec_())
