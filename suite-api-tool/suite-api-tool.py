@@ -5,6 +5,7 @@ from resource_table import ResourceTable
 from resource_details import ResourceDetails
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore
+import json
 import os
 
 class ToolUI(QMainWindow):
@@ -192,6 +193,10 @@ if __name__ == '__main__':
         os.mkdir(os.path.join(os.path.expanduser('~'), '.config/suite-api-tool'), 0o755)
     if not os.path.isfile(os.path.join(os.path.expanduser('~'), '.config/suite-api-tool/completion_list')):
         open(os.path.join(os.path.expanduser('~'), '.config/suite-api-tool/completion_list'), 'a').close()
+    if not os.path.isfile(os.path.join(os.path.expanduser('~'), '.config/suite-api-tool/user.json')):
+        user_dictionary = {'username': 'admin', 'password':'P@ssw0rd1'}
+        with open(os.path.join(os.path.expanduser('~'), '.config/suite-api-tool/user.json'), 'a') as default_file:
+            json.dump(obj=user_dictionary, fp=default_file, indent=2)
     app = QApplication(sys.argv)
     ex = ToolUI(app.clipboard())
     sys.exit(app.exec_())
