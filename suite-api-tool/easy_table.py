@@ -22,24 +22,21 @@ class EasyTable(QTableWidget):
 
     def copySelectedCellsToClipboard(self):
         if len(self.selectedItems()) > 0:
-            strings = list()
+            last_column_index = self.columnCount() - 1
+
+            clipboard_content = list()
             row = list()
-            last_row = None
-            got_columns = False
-            columns = list()
+            column_headers = list()
+
+            for i in range(0,last_column_index):
+                column_headers.append(str(self.horizontalHeaderItem(i).text()))
+            clipboard_content.append('\t'.join(column_headers))
+            clipboard_content.append('\n')
+
             for item in self.selectedItems():
-                current_row = item.row()
-                if(last_row is not None and last_row < current_row):
-                    if(not got_columns):
-                        strings.append('\t'.join(columns))
-                        strings.append('\n')
-                        got_columns = True
-                    strings.append('\t'.join(row))
-                    strings.append('\n')
-                    row.clear()
-                if(not got_columns):
-                    str(self.horizontalHeaderItem(item.column()))
-                    columns.append(str(self.horizontalHeaderItem(item.column()).text()))
                 row.append(str(item.text()))
-                last_row = item.row()
-            self.clipboard.setText(''.join(strings))
+                if item.column() == last_column_index:
+                    clipboard_content.append('\t'.join(row))
+                    clipboard_content.append('\n')
+                    row.clear()
+            self.clipboard.setText(''.join(clipboard_content))
