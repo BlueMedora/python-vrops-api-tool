@@ -2,9 +2,9 @@ import requests
 import re
 class Client:
 
-    def __init__(self, hostname):
-        self.__username = 'admin'
-        self.__password = 'P@ssw0rd1'
+    def __init__(self, hostname, username, password):
+        self.__username = username
+        self.__password = password
         if not self.is_valid_hostname(hostname):
             raise ValueError("Please enter a valid hostname!")
         self.__base_url = "https://"+hostname+"/suite-api/api"

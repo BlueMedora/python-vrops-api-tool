@@ -99,7 +99,8 @@ class ToolUI(QMainWindow):
 
     def __connectClicked(self):
         try:
-            self.__client = Client(self.__address_bar.text())
+            user = self.__load_user_json()
+            self.__client = Client(self.__address_bar.text(), user['username'], user['password'])
             self.__connection_label.setText("Currently Connected to: " + self.__address_bar.text())
         except ValueError as error:
             QMessageBox.warning(self.__main_widget, "Warning", str(error), QMessageBox.Ok)
@@ -159,6 +160,15 @@ class ToolUI(QMainWindow):
         self.__resource_table.setRowCount(0)
         self.__resource_table.reInit()
         self.__resource_table.addResources(resources)
+
+    def __load_user_json(self):
+        if not os.path.isfile(os.path.join(os.path.expanduser('~'), '.config/suite-api-tool/user.json')):
+            return {'username': 'admin', 'password': 'P@ssw0rd1'}
+
+        with open(os.path.join(os.path.expanduser('~'), '.config/suite-api-tool/user.json'), 'r') as user_file:
+            return json.load(user_file)
+
+
 
     def getResourceDetails(self):
         selected_items = self.__resource_table.selectedItems()
