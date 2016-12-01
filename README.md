@@ -1,9 +1,8 @@
-## Installing vropts-api-tool
+## Installing vrops-api-tool
 grab the latest binary from releases
 
 ## Contributing
-please file an issue or feature request in github issues
-PRs are welcome
+Please file an issue or feature request in github issues. PRs are welcome
 
 ## Building vrops-api-tool
 ### Python scripts to collect data from vrops
