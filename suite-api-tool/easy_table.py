@@ -6,6 +6,7 @@ class EasyTable(QTableWidget):
     def __init__(self, clipboard):
         super(EasyTable, self).__init__()
         self.clipboard = clipboard
+        self.setSortingEnabled(True)
 
     def keyPressEvent(self, key_event):
         if key_event.key() == QtCore.Qt.Key_C and key_event.modifiers().__eq__(QtCore.Qt.ControlModifier):
@@ -18,7 +19,6 @@ class EasyTable(QTableWidget):
         if key_event.key() == QtCore.Qt.Key_Down:
             if(self.currentRow() < self.rowCount() - 1):
                 self.selectRow(self.currentRow() + 1)
-
 
     def copySelectedCellsToClipboard(self):
         if len(self.selectedItems()) > 0:
