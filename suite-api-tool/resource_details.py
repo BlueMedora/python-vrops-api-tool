@@ -20,7 +20,6 @@ class ResourceDetails(QWidget):
         self.setLayout(hbox)
 
     def __parent_child_views(self, parents, children):
-        print("creating parent child view")
         vbox = QVBoxLayout()
         parents_label = QLabel()
         parents_label.setText("Parents: ")
