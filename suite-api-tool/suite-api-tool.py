@@ -5,6 +5,7 @@ from resource_table import ResourceTable
 from resource_details import ResourceDetails
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore
+from updater import Updater
 import json
 import os
 
@@ -25,6 +26,7 @@ class ToolUI(QMainWindow):
         self.__resource_table.doubleClicked.connect(self.getResourceDetails)
         self.__client = None
         self.initUI()
+        self.__check_for_updates()
 
     def initUI(self):
         self.__main_widget = QWidget()
@@ -197,6 +199,9 @@ class ToolUI(QMainWindow):
         resource_details.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         resource_details.resize(800, 800)
         resource_details.show()
+
+    def __check_for_updates(self):
+        is_latest = Updater().check_for_updates()
 
 if __name__ == '__main__':
     if not os.path.isdir(os.path.join(os.path.expanduser('~'), '.config')):
