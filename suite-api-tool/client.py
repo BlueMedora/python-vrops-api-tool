@@ -42,11 +42,45 @@ class Client:
         resources = self.__getResourceList(adapter_instance_id, resource_kinds)
         return self.__processResources(resources)
 
+    def getChildResources(self, resource_id):
+        resources = self.__getChildResourceList(resource_id)
+        return self.__processResources(resources)
+
+    def __getChildResourceList(self, resource_id):
+        page = 0
+        resource_list = list()
+        while True:
+            endpoint = "/resources/"+resource_id+"/relationships/children"
+            json_response = self.__get(endpoint)
+            #add resources to list
+            resource_list.extend(json_response["resourceList"])
+            if self.__isLastPage(json_response['pageInfo']):
+                break
+            page += 1
+        return resource_list
+
+    def getParentResources(self, resource_id):
+        resources = self.__getParentResourceList(resource_id)
+        return self.__processResources(resources)
+
+    def __getParentResourceList(self, resource_id):
+        page = 0
+        resource_list = list()
+        while True:
+            endpoint = "/resources/"+resource_id+"/relationships/parents"
+            json_response = self.__get(endpoint)
+            #add resources to list
+            resource_list.extend(json_response["resourceList"])
+            if self.__isLastPage(json_response['pageInfo']):
+                break
+            page += 1
+        return resource_list
+
+
     def __getResourceList(self, adapter_instance_id, resource_kinds):
         page = 0
         resource_list = list()
         while True:
-            url = self.__base_url + "/resources"
             payload = {"adapterInstanceId": adapter_instance_id, "resourceKind": resource_kinds, "page": page}
             json_response = self.__get("/resources", payload)
             #add resources to list
@@ -69,6 +103,8 @@ class Client:
             resource_dict = dict()
             resource_dict['name'] = resource['resourceKey']['name']
             resource_dict['uuid'] = resource['identifier']
+            resource_dict['adapter'] = resource['resourceKey']['adapterKindKey']
+            resource_dict['type'] = resource['resourceKey']['resourceKindKey']
             resource_dict['identifiers'] = list()
             resource_identifiers = resource['resourceKey']['resourceIdentifiers']
             for id in resource_identifiers:
