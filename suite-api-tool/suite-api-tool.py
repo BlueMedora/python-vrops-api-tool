@@ -8,11 +8,11 @@ from PyQt5 import QtCore
 from updater import Updater
 import json
 import os
+import webbrowser
 
 class ToolUI(QMainWindow):
 
     def __init__(self, clipboard):
-
         super().__init__()
         self.resize(800,600)
         self.clipboard = clipboard
@@ -170,8 +170,6 @@ class ToolUI(QMainWindow):
         with open(os.path.join(os.path.expanduser('~'), '.config/suite-api-tool/user.json'), 'r') as user_file:
             return json.load(user_file)
 
-
-
     def getResourceDetails(self):
         selected_items = self.__resource_table.selectedItems()
         all_same = all(e.row() == selected_items[0].row() for e in selected_items)
@@ -201,7 +199,12 @@ class ToolUI(QMainWindow):
         resource_details.show()
 
     def __check_for_updates(self):
-        is_latest = Updater().check_for_updates()
+        updater = Updater()
+        updater.check_for_updates()
+        if not updater.is_latest:
+            response = QMessageBox.question(self.__main_widget, "Update Available!", "A New version of this tool is available, would you like to download it now?", (QMessageBox.Yes|QMessageBox.No), )
+            if response == QMessageBox.Yes:
+                webbrowser.open(updater.latest_url)
 
 if __name__ == '__main__':
     if not os.path.isdir(os.path.join(os.path.expanduser('~'), '.config')):
