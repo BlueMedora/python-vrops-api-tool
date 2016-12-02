@@ -189,7 +189,9 @@ class ToolUI(QMainWindow):
             return
         metrics = self.__client.getMetricsByResourceUUID(resource_id)
         properties = self.__client.getPropertiesByResourceUUID(resource_id)
-        resource_details = ResourceDetails(self, self.clipboard, metrics, properties)
+        children = self.__client.getChildResources(resource_id)
+        parents = self.__client.getParentResources(resource_id)
+        resource_details = ResourceDetails(self, self.clipboard, metrics, properties, children, parents)
         resource_details.setWindowTitle(resource_name)
         resource_details.setWindowFlags(QtCore.Qt.Window)
         resource_details.setAttribute(QtCore.Qt.WA_DeleteOnClose)
