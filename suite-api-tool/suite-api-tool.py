@@ -10,11 +10,11 @@ import json
 import os
 import webbrowser
 
-class ToolUI(QMainWindow):
 
+class ToolUI(QMainWindow):
     def __init__(self, clipboard):
         super().__init__()
-        self.resize(800,600)
+        self.resize(800, 600)
         self.clipboard = clipboard
         self.__address_bar = QLineEdit()
         self.__adapter_type_combobox = QComboBox()
@@ -35,9 +35,12 @@ class ToolUI(QMainWindow):
         self.__assignClickActions()
         self.setTabOrder(self.__address_bar, self.__connect_button)
         self.setTabOrder(self.__connect_button, self.__adapter_type_combobox)
-        self.setTabOrder(self.__adapter_type_combobox, self.__resource_kind_combobox)
-        self.setTabOrder(self.__resource_kind_combobox, self.__adapter_instance_combobox)
-        self.setTabOrder(self.__adapter_instance_combobox, self.__resource_table)
+        self.setTabOrder(
+            self.__adapter_type_combobox, self.__resource_kind_combobox)
+        self.setTabOrder(
+            self.__resource_kind_combobox, self.__adapter_instance_combobox)
+        self.setTabOrder(
+            self.__adapter_instance_combobox, self.__resource_table)
         self.show()
 
     def __createMainLayout(self):
@@ -54,7 +57,8 @@ class ToolUI(QMainWindow):
         address_bar_layout = QHBoxLayout()
         address_bar_label = QLabel()
         address_bar_label.setText("Hostname:")
-        self.__address_bar.setCompleter(QCompleter(self.__getCompleterListFromFile()))
+        self.__address_bar.setCompleter(
+            QCompleter(self.__getCompleterListFromFile()))
         self.__connect_button.setText("Connect!")
         address_bar_layout.addWidget(address_bar_label)
         address_bar_layout.addWidget(self.__address_bar)
@@ -62,17 +66,23 @@ class ToolUI(QMainWindow):
         return address_bar_layout
 
     def __getCompleterListFromFile(self):
-        if not isfile(os.path.join(os.path.expanduser('~'), ".config/suite-api-tool/completion_list")):
+        if not isfile(os.path.join(
+                      os.path.expanduser('~'),
+                      ".config/suite-api-tool/completion_list")):
             return list()
-        with open(os.path.join(os.path.expanduser('~'), ".config/suite-api-tool/completion_list"), "r+") as f:
+        with open(os.path.join(
+                  os.path.expanduser('~'),
+                  ".config/suite-api-tool/completion_list"),
+                  "r+") as f:
             lines = f.read().splitlines()
         return lines
 
     def __createAdapterKindSelector(self):
         adapter_kind_selector_layout = QHBoxLayout()
         label = QLabel("Adapter Type: ")
-        self.__adapter_type_combobox.setFixedSize(500,25)
-        self.__adapter_type_combobox.activated.connect(self.__adapterKindComboBoxSelection)
+        self.__adapter_type_combobox.setFixedSize(500, 25)
+        self.__adapter_type_combobox.activated.connect(
+            self.__adapterKindComboBoxSelection)
         adapter_kind_selector_layout.addWidget(label)
         adapter_kind_selector_layout.addWidget(self.__adapter_type_combobox)
         return adapter_kind_selector_layout
@@ -81,8 +91,9 @@ class ToolUI(QMainWindow):
         resource_kind_selector_layout = QHBoxLayout()
         label = QLabel("Resource Kind: ")
         self.__resource_kind_combobox = QComboBox()
-        self.__resource_kind_combobox.setFixedSize(500,25)
-        self.__resource_kind_combobox.activated.connect(self.__adapterInstanceComboBoxSelection)
+        self.__resource_kind_combobox.setFixedSize(500, 25)
+        self.__resource_kind_combobox.activated.connect(
+            self.__adapterInstanceComboBoxSelection)
         resource_kind_selector_layout.addWidget(label)
         resource_kind_selector_layout.addWidget(self.__resource_kind_combobox)
         return resource_kind_selector_layout
@@ -90,10 +101,12 @@ class ToolUI(QMainWindow):
     def __createAdapterInstanceSelector(self):
         adapter_instance_selector_layout = QHBoxLayout()
         label = QLabel("Adapter Instance: ")
-        self.__adapter_instance_combobox.setFixedSize(500,25)
-        self.__adapter_instance_combobox.activated.connect(self.__adapterInstanceComboBoxSelection)
+        self.__adapter_instance_combobox.setFixedSize(500, 25)
+        self.__adapter_instance_combobox.activated.connect(
+            self.__adapterInstanceComboBoxSelection)
         adapter_instance_selector_layout.addWidget(label)
-        adapter_instance_selector_layout.addWidget(self.__adapter_instance_combobox)
+        adapter_instance_selector_layout.addWidget(
+            self.__adapter_instance_combobox)
         return adapter_instance_selector_layout
 
     def __assignClickActions(self):
@@ -102,21 +115,26 @@ class ToolUI(QMainWindow):
     def __connectClicked(self):
         try:
             user = self.__load_user_json()
-            self.__client = Client(self.__address_bar.text(), user['username'], user['password'])
-            self.__connection_label.setText("Currently Connected to: " + self.__address_bar.text())
+            self.__client = Client(self.__address_bar.text(),
+                                   user['username'], user['password'])
+            self.__connection_label.setText("Currently Connected to: " +
+                                            self.__address_bar.text())
         except ValueError as error:
-            QMessageBox.warning(self.__main_widget, "Warning", str(error), QMessageBox.Ok)
+            QMessageBox.warning(self.__main_widget,
+                                "Warning", str(error), QMessageBox.Ok)
             return
         try:
             items = self.__client.getAdapterKinds()
             self.__address_bar.completer()
             self.__addItemsToAdapterKinds(items)
             self.__addItemToCompletionList(self.__address_bar.text())
-            self.__address_bar.setCompleter(QCompleter(self.__getCompleterListFromFile()))
+            self.__address_bar.setCompleter(
+                QCompleter(self.__getCompleterListFromFile()))
             self.__adapter_instance_combobox.clear()
             self.__resource_kind_combobox.clear()
         except Exception as error:
-            QMessageBox.warning(self.__main_widget, "Warning", str(error), QMessageBox.Ok)
+            QMessageBox.warning(self.__main_widget,
+                                "Warning", str(error), QMessageBox.Ok)
 
     def __addItemsToAdapterKinds(self, items):
         self.__adapter_type_combobox.clear()
@@ -125,19 +143,23 @@ class ToolUI(QMainWindow):
 
     def __addItemToCompletionList(self, item):
         current_list = list()
-        if isfile(os.path.join(os.path.expanduser('~'), ".config/suite-api-tool/completion_list")):
-            with open(os.path.join(os.path.expanduser('~'), ".config/suite-api-tool/completion_list"), "r+") as f:
+        if isfile(os.path.join(os.path.expanduser('~'),
+                  ".config/suite-api-tool/completion_list")):
+            with open(os.path.join(os.path.expanduser('~'),
+                      ".config/suite-api-tool/completion_list"), "r+") as f:
                 current_list = f.read().splitlines()
         if(item in current_list):
             current_list.remove(item)
         current_list.insert(0, item)
-        with open(os.path.join(os.path.expanduser('~'), ".config/suite-api-tool/completion_list"), 'w+') as file:
+        with open(os.path.join(os.path.expanduser('~'),
+                  ".config/suite-api-tool/completion_list"), 'w+') as file:
             file.write("\n".join(current_list))
 
     def __adapterKindComboBoxSelection(self):
         adapter_kind = self.__adapter_type_combobox.currentData()
         adapter_instances = self.__client.getAdapterInstances(adapter_kind)
-        resource_kinds = self.__client.getResourceKindsByAdapterKind(adapter_kind)
+        resource_kinds = self.__client.getResourceKindsByAdapterKind(
+            adapter_kind)
         self.__addItemsToAdapterInstances(adapter_instances)
         self.__addItemsToResourceKinds(resource_kinds)
 
@@ -149,13 +171,15 @@ class ToolUI(QMainWindow):
     def __adapterInstanceComboBoxSelection(self):
         adapter_instance_id = self.__adapter_instance_combobox.currentData()
         resource_kind_id = self.__resource_kind_combobox.currentData()
-        resources = self.__client.getResources(adapter_instance_id, resource_kind_id)
+        resources = self.__client.getResources(adapter_instance_id,
+                                               resource_kind_id)
         self.__createResourceTable(resources)
 
     def __addItemsToResourceKinds(self, resource_kinds):
         self.__resource_kind_combobox.clear()
         for resource_kind in resource_kinds:
-            self.__resource_kind_combobox.addItem(resource_kind[0], resource_kind[1])
+            self.__resource_kind_combobox.addItem(resource_kind[0],
+                                                  resource_kind[1])
 
     def __createResourceTable(self, resources):
         self.__resource_table.setColumnCount(0)
@@ -164,17 +188,24 @@ class ToolUI(QMainWindow):
         self.__resource_table.addResources(resources)
 
     def __load_user_json(self):
-        if not os.path.isfile(os.path.join(os.path.expanduser('~'), '.config/suite-api-tool/user.json')):
+        if not os.path.isfile(os.path.join(
+                os.path.expanduser('~'),
+                '.config/suite-api-tool/user.json')):
             return {'username': 'admin', 'password': 'P@ssw0rd1'}
 
-        with open(os.path.join(os.path.expanduser('~'), '.config/suite-api-tool/user.json'), 'r') as user_file:
+        with open(os.path.join(
+                os.path.expanduser('~'),
+                '.config/suite-api-tool/user.json'), 'r') as user_file:
             return json.load(user_file)
 
     def getResourceDetails(self):
         selected_items = self.__resource_table.selectedItems()
-        all_same = all(e.row() == selected_items[0].row() for e in selected_items)
+        all_same = all(e.row() == selected_items[0].row()
+                       for e in selected_items)
         if not all_same:
-            QMessageBox.warning(self.__main_widget, "Warning", "Please only select one row.", QMessageBox.Ok)
+            QMessageBox.warning(
+                self.__main_widget, "Warning",
+                "Please only select one row.", QMessageBox.Ok)
             return
         # get uuid of row
         resource_id = None
@@ -185,13 +216,18 @@ class ToolUI(QMainWindow):
             if item.column() == 1:
                 resource_id = item.text()
         if resource_id is None or resource_name is None:
-            QMessageBox.warning(self.__main_widget, "Warning", "Could not find one or both of Name or UUID of resource selected.", QMessageBox.Ok)
+            QMessageBox.warning(
+                self.__main_widget, "Warning",
+                "Could not find one or both " +
+                "of Name or UUID of resource selected.",
+                QMessageBox.Ok)
             return
         metrics = self.__client.getMetricsByResourceUUID(resource_id)
         properties = self.__client.getPropertiesByResourceUUID(resource_id)
         children = self.__client.getChildResources(resource_id)
         parents = self.__client.getParentResources(resource_id)
-        resource_details = ResourceDetails(self, self.clipboard, metrics, properties, children, parents)
+        resource_details = ResourceDetails(
+            self, self.clipboard, metrics, properties, children, parents)
         resource_details.setWindowTitle(resource_name)
         resource_details.setWindowFlags(QtCore.Qt.Window)
         resource_details.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -202,20 +238,34 @@ class ToolUI(QMainWindow):
         updater = Updater()
         updater.check_for_updates()
         if not updater.is_latest:
-            response = QMessageBox.question(self.__main_widget, "Update Available!", "A New version of this tool is available, would you like to download it now?", (QMessageBox.Yes|QMessageBox.No), )
+            response = QMessageBox.question(
+                self.__main_widget, "Update Available!",
+                "A New version of this tool is available," +
+                " would you like to download it now?",
+                (QMessageBox.Yes | QMessageBox.No))
             if response == QMessageBox.Yes:
                 webbrowser.open(updater.latest_url)
+
 
 if __name__ == '__main__':
     if not os.path.isdir(os.path.join(os.path.expanduser('~'), '.config')):
         os.mkdir(os.path.join(os.path.expanduser('~'), '.config'), 0o644)
-    if not os.path.isdir(os.path.join(os.path.expanduser('~'), '.config/suite-api-tool')):
-        os.mkdir(os.path.join(os.path.expanduser('~'), '.config/suite-api-tool'), 0o755)
-    if not os.path.isfile(os.path.join(os.path.expanduser('~'), '.config/suite-api-tool/completion_list')):
-        open(os.path.join(os.path.expanduser('~'), '.config/suite-api-tool/completion_list'), 'a').close()
-    if not os.path.isfile(os.path.join(os.path.expanduser('~'), '.config/suite-api-tool/user.json')):
-        user_dictionary = {'username': 'admin', 'password':'P@ssw0rd1'}
-        with open(os.path.join(os.path.expanduser('~'), '.config/suite-api-tool/user.json'), 'a') as default_file:
+    if not os.path.isdir(os.path.join(os.path.expanduser('~'),
+                                      '.config/suite-api-tool')):
+        os.mkdir(os.path.join(os.path.expanduser('~'),
+                              '.config/suite-api-tool'), 0o755)
+    if not os.path.isfile(os.path.join(os.path.expanduser('~'),
+                          '.config/suite-api-tool/completion_list')):
+        open(os.path.join(
+             os.path.expanduser('~'),
+             '.config/suite-api-tool/completion_list'), 'a').close()
+    if not os.path.isfile(os.path.join(os.path.expanduser('~'),
+                          '.config/suite-api-tool/user.json')):
+        user_dictionary = {'username': 'admin', 'password': 'P@ssw0rd1'}
+        with open(os.path.join(
+                  os.path.expanduser('~'),
+                  '.config/suite-api-tool/user.json'),
+                  'a') as default_file:
             json.dump(obj=user_dictionary, fp=default_file, indent=2)
     app = QApplication(sys.argv)
     ex = ToolUI(app.clipboard())

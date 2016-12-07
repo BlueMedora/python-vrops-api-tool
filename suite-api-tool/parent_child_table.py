@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
 from easy_table import EasyTable
 
+
 class ParentChildTable(EasyTable):
     def __init__(self, clipboard):
         super(ParentChildTable, self).__init__(clipboard)

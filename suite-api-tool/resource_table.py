@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
 from easy_table import EasyTable
 
+
 class ResourceTable(EasyTable):
     def __init__(self, clipboard):
         super(ResourceTable, self).__init__(clipboard)
@@ -34,8 +35,8 @@ class ResourceTable(EasyTable):
         self.setItem(row_index, 1, uuid)
 
         for i, identifier in enumerate(resource['identifiers']):
-            column_count = i+3
-            column_index = i+2
+            column_count = i + 3
+            column_index = i + 2
             identifier_widget = QTableWidgetItem()
             identifier_widget.setText(identifier['value'])
             if self.columnCount() < column_count:

@@ -2,9 +2,15 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel
 from metrics_table import MetricsTable
 from parent_child_table import ParentChildTable
 
-class ResourceDetails(QWidget):
 
-    def __init__(self, parent, clipboard, metrics, properties, parents, children):
+class ResourceDetails(QWidget):
+    def __init__(self,
+                 parent,
+                 clipboard,
+                 metrics,
+                 properties,
+                 parents,
+                 children):
         super().__init__(parent)
         self.clipboard = clipboard
         self.metrics_table = MetricsTable(self.clipboard)

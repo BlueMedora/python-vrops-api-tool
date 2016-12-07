@@ -1,5 +1,7 @@
 import requests
 import re
+
+
 class Client:
 
     def __init__(self, hostname, username, password):
@@ -7,13 +9,17 @@ class Client:
         self.__password = password
         if not self.is_valid_hostname(hostname):
             raise ValueError("Please enter a valid hostname!")
-        self.__base_url = "https://"+hostname+"/suite-api/api"
+        self.__base_url = "https://" + hostname + "/suite-api/api"
         self.adapter_kind = None
         self.resource_kinds = None
 
     def getAdapterKinds(self):
         url = self.__base_url + "/adapterkinds"
-        response = requests.get(url, auth=(self.__username, self.__password), headers={"Accept": "application/json"}, verify=False, timeout=5)
+        response = requests.get(url,
+                                auth=(self.__username, self.__password),
+                                headers={"Accept": "application/json"},
+                                verify=False,
+                                timeout=5)
         keys = list()
         for thing in response.json()['adapter-kind']:
             keys.append((thing['name'], thing['key']))
@@ -30,11 +36,12 @@ class Client:
         return keys
 
     def getResourceKindsByAdapterKind(self, adapter_kind):
-        endpoint = "/adapterkinds/"+adapter_kind+"/resourcekinds"
+        endpoint = "/adapterkinds/" + adapter_kind + "/resourcekinds"
         json = self.__get(endpoint)
         resource_kinds = list()
         for resource_kind in json['resource-kind']:
-            resource_kinds.append((resource_kind['name'], resource_kind['key']))
+            resource_kinds.append((resource_kind['name'],
+                                   resource_kind['key']))
         resource_kinds = sorted(resource_kinds, key=lambda k: k[0].lower())
         return resource_kinds
 
@@ -50,9 +57,9 @@ class Client:
         page = 0
         resource_list = list()
         while True:
-            endpoint = "/resources/"+resource_id+"/relationships/children"
+            endpoint = "/resources/" + resource_id + "/relationships/children"
             json_response = self.__get(endpoint)
-            #add resources to list
+            # add resources to list
             resource_list.extend(json_response["resourceList"])
             if self.__isLastPage(json_response['pageInfo']):
                 break
@@ -67,23 +74,24 @@ class Client:
         page = 0
         resource_list = list()
         while True:
-            endpoint = "/resources/"+resource_id+"/relationships/parents"
+            endpoint = "/resources/" + resource_id + "/relationships/parents"
             json_response = self.__get(endpoint)
-            #add resources to list
+            # add resources to list
             resource_list.extend(json_response["resourceList"])
             if self.__isLastPage(json_response['pageInfo']):
                 break
             page += 1
         return resource_list
 
-
     def __getResourceList(self, adapter_instance_id, resource_kinds):
         page = 0
         resource_list = list()
         while True:
-            payload = {"adapterInstanceId": adapter_instance_id, "resourceKind": resource_kinds, "page": page}
+            payload = {"adapterInstanceId": adapter_instance_id,
+                       "resourceKind": resource_kinds,
+                       "page": page}
             json_response = self.__get("/resources", payload)
-            #add resources to list
+            # add resources to list
             resource_list.extend(json_response["resourceList"])
             if self.__isLastPage(json_response['pageInfo']):
                 break
@@ -103,10 +111,12 @@ class Client:
             resource_dict = dict()
             resource_dict['name'] = resource['resourceKey']['name']
             resource_dict['uuid'] = resource['identifier']
-            resource_dict['adapter'] = resource['resourceKey']['adapterKindKey']
+            resource_dict['adapter'] = resource[
+                'resourceKey']['adapterKindKey']
             resource_dict['type'] = resource['resourceKey']['resourceKindKey']
             resource_dict['identifiers'] = list()
-            resource_identifiers = resource['resourceKey']['resourceIdentifiers']
+            resource_identifiers = resource[
+                'resourceKey']['resourceIdentifiers']
             for id in resource_identifiers:
                 identifier = dict()
                 identifier['name'] = id['identifierType']['name']
@@ -133,7 +143,7 @@ class Client:
         return metrics
 
     def getPropertiesByResourceUUID(self, uuid):
-        endpoint = '/resources/'+str(uuid)+'/properties'
+        endpoint = '/resources/' + str(uuid) + '/properties'
         response = self.__get(endpoint)
         properties = list()
         for stat in response['property']:
@@ -154,14 +164,13 @@ class Client:
                                 timeout=5)
         return response.json()
 
-
     def is_valid_hostname(self, hostname):
         if len(hostname) > 255:
             return False
         if len(hostname) <= 0:
             return False
         if hostname[-1] == ".":
-            hostname = hostname[:-1] # strip exactly one dot from the right, if present
+            # strip exactly one dot from the right, if present
+            hostname = hostname[:-1]
         allowed = re.compile("(?!-)[A-Z\d-]{1,63}(?<!-)$", re.IGNORECASE)
         return all(allowed.match(x) for x in hostname.split("."))
-

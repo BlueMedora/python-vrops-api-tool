@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
 from easy_table import EasyTable
 import time
-import sys
+
 
 class MetricsTable(EasyTable):
     def __init__(self, clipboard):
@@ -43,6 +43,8 @@ class MetricsTable(EasyTable):
                 timestamp_header = QTableWidgetItem()
                 timestamp_header.setText("Timestamp")
                 self.setHorizontalHeaderItem(2, timestamp_header)
-            timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(metric['timestamp'] / 1000))
+            timestamp = time.strftime(
+                '%Y-%m-%d %H:%M:%S',
+                time.localtime(metric['timestamp'] / 1000))
             metric_timestamp.setText(timestamp)
             self.setItem(row_index, 2, metric_timestamp)
