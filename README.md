@@ -1,6 +1,9 @@
 ## Installing vrops-api-tool
 grab the latest binary from releases
 
+### Debian Stretch/Ubuntu 16
+`apt-get install python3-pyqt5` (thats it!)
+
 ## Contributing
 Please file an issue or feature request in github issues. PRs are welcome
 
