@@ -129,18 +129,42 @@ class Client:
     def getMetricsByResourceUUID(self, uuid):
         endpoint = '/resources/stats/latest'
         payload = {"resourceId": uuid}
-        response = self.__get(endpoint, payload)
+        metric_response = self.__get(endpoint, payload)
         metrics = list()
 
-        for entry in response.get('values', list()):
+        metric_units = self.getMetricUnitsByResourceUUID(uuid)
+
+        for entry in metric_response.get('values', list()):
             for stat in entry['stat-list']['stat']:
                 metric = dict()
                 metric['key'] = stat['statKey']['key']
                 metric['timestamp'] = stat['timestamps'][0]
                 metric['value'] = stat['data'][0]
+                metric['units'] = metric_units[metric['key']]
                 metrics.append(metric)
         metrics = sorted(metrics, key=lambda k: k['key'].lower())
         return metrics
+
+    def getMetricUnitsByResourceUUID(self, uuid):
+        resource_kind_response = self.__get('/resources/' + str(uuid), list())
+        resource_kind = resource_kind_response.get('resourceKey').get('resourceKindKey')
+        adapter_kind = resource_kind_response.get('resourceKey').get('adapterKindKey')
+
+        endpoint = "/adapterkinds/" + adapter_kind + "/resourcekinds/" + resource_kind + "/statkeys"
+        metric_units_response = self.__get(endpoint, list())
+
+        metric_units = dict()
+
+        for metric in metric_units_response.get('resourceTypeAttributes'):
+            key = metric.get('key')
+            try:
+                if metric.get('unit') is not None:
+                    metric_units[key] = metric.get('unit')
+                else:
+                    metric_units[key] = '--'
+            except:
+                metric_units[key] = '--'
+        return metric_units
 
     def getPropertiesByResourceUUID(self, uuid):
         endpoint = '/resources/' + str(uuid) + '/properties'
