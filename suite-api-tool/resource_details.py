@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel
-from PyQt5.Qt import Qt
+from PyQt5 import QtCore
 from metrics_table import MetricsTable
 from parent_child_table import ParentChildTable
 
@@ -14,6 +14,7 @@ class ResourceDetails(QWidget):
                  parents,
                  children):
         super().__init__(parent)
+        self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.clipboard = clipboard
         self.metrics_table = MetricsTable(self.clipboard)
         self.properties_table = MetricsTable(self.clipboard)
@@ -33,7 +34,7 @@ class ResourceDetails(QWidget):
             hbox = QHBoxLayout()
             key_label = QLabel()
             key_label.setText(str(key) + ":")
-            key_label.setAlignment(Qt.AlignRight)
+            key_label.setAlignment(QtCore.Qt.AlignRight)
             hbox.addWidget(key_label)
             value_label = QLabel()
             value_label.setText(value)
@@ -76,3 +77,8 @@ class ResourceDetails(QWidget):
         vbox.addWidget(metrics_label)
         vbox.addWidget(self.metrics_table)
         return vbox
+
+    def keyPressEvent(self, key_event):
+        if (key_event.key() == QtCore.Qt.Key_W and
+                key_event.modifiers().__eq__(QtCore.Qt.ControlModifier)):
+            self.close()

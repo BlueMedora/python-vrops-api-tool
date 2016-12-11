@@ -229,13 +229,14 @@ class ToolUI(QMainWindow):
         children = self.__client.getChildResources(resource_information['Resource UUID'])
         parents = self.__client.getParentResources(resource_information['Resource UUID'])
         resource_details = ResourceDetails(
-            self, self.clipboard, resource_information, metrics, properties, children, parents)
+            self, self.clipboard, resource_information, metrics, properties, parents, children)
         resource_details.children_table.doubleClicked.connect(self.getResourceDetails)
         resource_details.parents_table.doubleClicked.connect(self.getResourceDetails)
         resource_details.setWindowTitle(resource_information['Resource Name'])
         resource_details.setWindowFlags(QtCore.Qt.Window)
         resource_details.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         resource_details.resize(800, 800)
+        resource_details.setFocus(QtCore.Qt.PopupFocusReason)
         resource_details.show()
 
     def __check_for_updates(self):
