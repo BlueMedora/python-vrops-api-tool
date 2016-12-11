@@ -7,6 +7,7 @@ from resource_details import ResourceDetails
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore
 from updater import Updater
+from collections import OrderedDict
 import json
 import os
 import webbrowser
@@ -211,30 +212,27 @@ class ToolUI(QMainWindow):
                 self.__main_widget, "Warning",
                 "Please only select one row.", QMessageBox.Ok)
             return
-        # get uuid of row
-        resource_id = None
-        resource_name = None
+        resource_information = OrderedDict()
         for item in table.selectedItems():
-            if item.column() == 0:
-                resource_name = item.text()
-            if item.column() == 1:
-                resource_id = item.text()
-        if resource_id is None or resource_name is None:
+            header = table.horizontalHeaderItem(item.column())
+            resource_information[header.text()] = item.text()
+
+        if resource_information['Resource UUID'] is None:
             QMessageBox.warning(
                 self.__main_widget, "Warning",
-                "Could not find one or both " +
-                "of Name or UUID of resource selected.",
+                "Could not find UUID of resource selected.",
                 QMessageBox.Ok)
             return
-        metrics = self.__client.getMetricsByResourceUUID(resource_id)
-        properties = self.__client.getPropertiesByResourceUUID(resource_id)
-        children = self.__client.getChildResources(resource_id)
-        parents = self.__client.getParentResources(resource_id)
+
+        metrics = self.__client.getMetricsByResourceUUID(resource_information['Resource UUID'])
+        properties = self.__client.getPropertiesByResourceUUID(resource_information['Resource UUID'])
+        children = self.__client.getChildResources(resource_information['Resource UUID'])
+        parents = self.__client.getParentResources(resource_information['Resource UUID'])
         resource_details = ResourceDetails(
-            self, self.clipboard, metrics, properties, children, parents)
+            self, self.clipboard, resource_information, metrics, properties, children, parents)
         resource_details.children_table.doubleClicked.connect(self.getResourceDetails)
         resource_details.parents_table.doubleClicked.connect(self.getResourceDetails)
-        resource_details.setWindowTitle(resource_name)
+        resource_details.setWindowTitle(resource_information['Resource Name'])
         resource_details.setWindowFlags(QtCore.Qt.Window)
         resource_details.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         resource_details.resize(800, 800)
