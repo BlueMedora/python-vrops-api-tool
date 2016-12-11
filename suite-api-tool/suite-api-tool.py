@@ -2,7 +2,6 @@ import sys
 from os.path import isfile
 from client import Client
 from resource_table import ResourceTable
-from resource_details import ResourceDetails
 from resource_details import ParentChildTable
 from resource_details import ResourceDetails
 from PyQt5.QtWidgets import *
