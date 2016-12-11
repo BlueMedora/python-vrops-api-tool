@@ -5,3 +5,4 @@ completion_list
 build
 dist
 suite-api-tool*.dmg
+.#*
