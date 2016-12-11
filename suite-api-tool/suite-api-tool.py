@@ -2,6 +2,7 @@ import sys
 from os.path import isfile
 from client import Client
 from resource_table import ResourceTable
+from resource_details import ParentChildTable
 from resource_details import ResourceDetails
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore
@@ -199,7 +200,10 @@ class ToolUI(QMainWindow):
             return json.load(user_file)
 
     def getResourceDetails(self):
-        selected_items = self.__resource_table.selectedItems()
+        table = self.sender()
+        if not (ResourceTable != type(table) or ParentChildTable != type(table)):
+            return
+        selected_items = table.selectedItems()
         all_same = all(e.row() == selected_items[0].row()
                        for e in selected_items)
         if not all_same:
@@ -210,7 +214,7 @@ class ToolUI(QMainWindow):
         # get uuid of row
         resource_id = None
         resource_name = None
-        for item in self.__resource_table.selectedItems():
+        for item in table.selectedItems():
             if item.column() == 0:
                 resource_name = item.text()
             if item.column() == 1:
@@ -228,6 +232,8 @@ class ToolUI(QMainWindow):
         parents = self.__client.getParentResources(resource_id)
         resource_details = ResourceDetails(
             self, self.clipboard, metrics, properties, children, parents)
+        resource_details.children_table.doubleClicked.connect(self.getResourceDetails)
+        resource_details.parents_table.doubleClicked.connect(self.getResourceDetails)
         resource_details.setWindowTitle(resource_name)
         resource_details.setWindowFlags(QtCore.Qt.Window)
         resource_details.setAttribute(QtCore.Qt.WA_DeleteOnClose)
