@@ -19,7 +19,7 @@ fi
 
 # set up your app name, version number, and background image file name
 APP_NAME="suite-api-tool"
-VERSION="v0.0.4"
+VERSION="v0.0.5"
 
 # you should not need to change these
 APP_EXE="${APP_NAME}.app/Contents/MacOS/${APP_NAME}"
