@@ -139,7 +139,10 @@ class Client:
                 metric = dict()
                 metric['key'] = stat['statKey']['key']
                 metric['timestamp'] = stat['timestamps'][0]
-                metric['value'] = stat['data'][0]
+                if('values' in stat):
+                    metric['value'] = stat['values'][0]
+                else:
+                    metric['value'] = stat['data'][0]
                 metric['units'] = metric_units[metric['key']]
                 metrics.append(metric)
         metrics = sorted(metrics, key=lambda k: k['key'].lower())
