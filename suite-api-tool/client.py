@@ -143,8 +143,7 @@ class Client:
                     metric['value'] = stat['values'][0]
                 else:
                     metric['value'] = stat['data'][0]
-                print(str(metric['key']))
-                print(metric_units)
+                
                 strip_instances_regex = ':.*?\|'
                 unit_key = re.sub(strip_instances_regex, '|', metric['key'])
                 metric['units'] = metric_units[unit_key]
