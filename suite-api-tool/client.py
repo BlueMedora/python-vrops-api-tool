@@ -143,7 +143,11 @@ class Client:
                     metric['value'] = stat['values'][0]
                 else:
                     metric['value'] = stat['data'][0]
-                metric['units'] = metric_units[metric['key']]
+                print(str(metric['key']))
+                print(metric_units)
+                strip_instances_regex = ':.*?\|'
+                unit_key = re.sub(strip_instances_regex, '|', metric['key'])
+                metric['units'] = metric_units[unit_key]
                 metrics.append(metric)
         metrics = sorted(metrics, key=lambda k: k['key'].lower())
         return metrics
