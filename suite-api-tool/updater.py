@@ -5,7 +5,7 @@ from distutils.version import LooseVersion
 
 class Updater():
     def __init__(self):
-        self.__current_version = "v0.0.5"
+        self.__current_version = "v0.0.6"
         self.latest_url = None
         self.is_latest = True
 
