@@ -146,7 +146,7 @@ class Client:
                 
                 strip_instances_regex = ':.*?\|'
                 unit_key = re.sub(strip_instances_regex, '|', metric['key'])
-                metric['units'] = metric_units[unit_key]
+                metric['units'] = metric_units.get(unit_key, "--")
                 metrics.append(metric)
         metrics = sorted(metrics, key=lambda k: k['key'].lower())
         return metrics
@@ -186,6 +186,7 @@ class Client:
 
     def __get(self, endpoint, parameters=None):
         url = self.__base_url + endpoint
+        print(url)
         response = requests.get(url,
                                 auth=(self.__username, self.__password),
                                 headers={"Accept": "application/json"},
